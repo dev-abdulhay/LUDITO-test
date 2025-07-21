@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:13-alpine
+    container_name: postgres_service
+    restart: always
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ludito-app
+    networks:
+      - app_network
+networks:
+  app_network:
+    driver: bridge

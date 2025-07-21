@@ -1,0 +1,45 @@
+server:
+  port: 8081
+
+
+spring:
+  application:
+    name: ludito-app
+  datasource:
+    url: jdbc:postgresql://localhost:5433/ludito-app
+    username: postgres
+    password: password
+  jpa:
+    show-sql: on
+    hibernate:
+      ddl-auto: validate
+    generate-ddl: on
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        enable_lazy_load_no_trans: true
+    open-in-view: false
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: false
+  flyway:
+    schemas: public, billing, auth, info
+    create-schemas: true
+    baseline-on-migrate: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+    docExpansion: none
+  api-docs:
+    path: /v3/api-docs
+
+
+
+jwt:
+  accessSecret: ${JWT_ACCESS_SECRET:7iUEkAkadb5Y2yp4lZvCCdRXXa1x1K}
+  refreshSecret: ${JWT_REFRESH_SECRET:5m2ddbAsdWkptjs2diNvRn06tMzdp0AX}
+  accessExpireTime: ${JWT_ACCESS_EXPIRE_TIME:1120}
+  refreshExpireDays: ${JWT_REFRESH_EXPIRE_DAY:30}
