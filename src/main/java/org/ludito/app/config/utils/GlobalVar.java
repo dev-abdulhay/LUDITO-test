@@ -51,6 +51,7 @@ public class GlobalVar {
         GlobalVar.USER_UUID.remove();
         GlobalVar.H_AUTHORIZATION.remove();
         GlobalVar.AUTH_USER.remove();
+        GlobalVar.USER_ID.remove();
         ThreadContext.clearAll();
     }
 

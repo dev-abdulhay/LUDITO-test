@@ -6,9 +6,9 @@ spring:
   application:
     name: ludito-app
   datasource:
-    url: jdbc:postgresql://localhost:5433/ludito-app
-    username: postgres
-    password: password
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/ludito-app}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
   jpa:
     show-sql: on
     hibernate:
@@ -26,6 +26,7 @@ spring:
     schemas: public, billing, auth, info
     create-schemas: true
     baseline-on-migrate: true
+    baseline-version: 1
 
 springdoc:
   swagger-ui:
@@ -39,7 +40,7 @@ springdoc:
 
 
 jwt:
-  accessSecret: ${JWT_ACCESS_SECRET:7iUEkAkadb5Y2yp4lZvCCdRXXa1x1K}
-  refreshSecret: ${JWT_REFRESH_SECRET:5m2ddbAsdWkptjs2diNvRn06tMzdp0AX}
+  accessSecret: ${JWT_ACCESS_SECRET:7iUEkAkadb5Y2yp4lZvCCdRXXsdfsdfsdfsdfssa1x1K}
+  refreshSecret: ${JWT_REFRESH_SECRET:5m2ddbAsdWkptjs2diNvRndfsdfsdfsdfsf06tMzdp0AX}
   accessExpireTime: ${JWT_ACCESS_EXPIRE_TIME:1120}
   refreshExpireDays: ${JWT_REFRESH_EXPIRE_DAY:30}

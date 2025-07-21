@@ -20,4 +20,7 @@ public interface UserAccessRepository extends BaseRepository<UserAccess> {
             @NotNull Long userId,
             @NotNull UserLoginStatus userLoginStatus
     );
+
+    void deleteByUser_IdAndStatus(@NotNull Long userId, @NotNull UserLoginStatus userLoginStatus);
+
 }

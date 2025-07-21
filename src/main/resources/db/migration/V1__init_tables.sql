@@ -162,3 +162,58 @@ ALTER TABLE info.operation_config
 
 ALTER TABLE info.operation_config
     ADD CONSTRAINT uc_operation_config_uuid UNIQUE (uuid);
+
+
+
+
+-- Insert default data into auth."user" and auth.wallet tables
+
+
+
+
+INSERT INTO auth."user" (created_at, updated_at, username, first_name, last_name, password, phone, status)
+VALUES
+    (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'user1', 'John', 'Doe', '$2a$10$JtgH29Vaex/i6zC/1kQ19.DMjIT.Xu6W0V5Wmqhwho0Vdbi3UgE.u', '123-456-7890', 'ACTIVE'),
+    (CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'user2', 'Jane', 'Smith', '$2a$10$Qh/g.oLhRD7Ukeo6IbX64uDufkoLSsoWvSTOszginNFiSP2Nzmj8y', '987-654-3210', 'ACTIVE');
+
+
+
+INSERT INTO billing.wallet (created_at, updated_at, name, balance, currency, user_id)
+SELECT CURRENT_TIMESTAMP,
+       CURRENT_TIMESTAMP,
+       'Main Wallet',
+       0,
+       'UZS',
+       u.id
+FROM auth."user" u
+WHERE u.username = 'user1';
+
+INSERT INTO billing.wallet (created_at, updated_at, name, balance, currency, user_id)
+SELECT CURRENT_TIMESTAMP,
+       CURRENT_TIMESTAMP,
+       'Secondary Wallet',
+       320000,
+       'USD',
+       u.id
+FROM auth."user" u
+WHERE u.username = 'user1';
+
+INSERT INTO billing.wallet (created_at, updated_at, name, balance, currency, user_id)
+SELECT CURRENT_TIMESTAMP,
+       CURRENT_TIMESTAMP,
+       'Main Wallet',
+       4000000000,
+       'UZS',
+       u.id
+FROM auth."user" u
+WHERE u.username = 'user2';
+
+INSERT INTO billing.wallet (created_at, updated_at, name, balance, currency, user_id)
+SELECT CURRENT_TIMESTAMP,
+       CURRENT_TIMESTAMP,
+       'Secondary Wallet',
+       0,
+       'USD',
+       u.id
+FROM auth."user" u
+WHERE u.username = 'user2';

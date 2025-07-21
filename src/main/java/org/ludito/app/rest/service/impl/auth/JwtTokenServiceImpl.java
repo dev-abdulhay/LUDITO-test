@@ -8,6 +8,7 @@ import org.ludito.app.config.exceptions.InvalidTokenException;
 import org.ludito.app.config.utils.GlobalVar;
 import org.ludito.app.rest.entity.auth.User;
 import org.ludito.app.rest.entity.auth.UserAccess;
+import org.ludito.app.rest.enums.UserLoginStatus;
 import org.ludito.app.rest.payload.res.auth.ResLoginVerify;
 import org.ludito.app.rest.repository.auth.UserAccessRepository;
 import org.ludito.app.rest.repository.auth.UserRepository;
@@ -33,6 +34,10 @@ public class JwtTokenServiceImpl implements TokenService {
 
         UUID uuid = validateJwtToken(token);
         User res = validateUser(uuid);
+
+        if ((res.getAccess() == null) || res.getAccess().getStatus() == null || !UserLoginStatus.VERIFIED.equals(res.getAccess().getStatus())) {
+            throw new InvalidTokenException("Невалидный токен");
+        }
 
         return res;
     }

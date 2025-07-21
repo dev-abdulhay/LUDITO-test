@@ -1,5 +1,6 @@
 package org.ludito.app.rest.service.impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.ludito.app.config.exceptions.CustomException;
 import org.ludito.app.config.utils.GlobalVar;
@@ -19,7 +20,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 
 
@@ -86,9 +86,18 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public ResLogout logout() {
-        List<UserAccess> allByUserIdAndStatus = userAccessRepository.findAllByUser_IdAndStatus(GlobalVar.getUserId(), UserLoginStatus.VERIFIED);
-        userAccessRepository.deleteAll(allByUserIdAndStatus);
+
+//        List<UserAccess> allByUserIdAndStatus = userAccessRepository.findAllByUser_IdAndStatus(GlobalVar.getUserId(), UserLoginStatus.VERIFIED);
+//         userAccessRepository.deleteByUser_IdAndStatus(GlobalVar.getUserId(), UserLoginStatus.VERIFIED);
+//        userAccessRepository.deleteAll(allByUserIdAndStatus);
+        User user = GlobalVar.getAuthUser();
+        user.setAccess(null);
+        userService.saveAndFlush(user);
+
+        GlobalVar.clearContext();
+
         return ResLogout.builder()
                 .message("Logout successfully")
                 .build();
