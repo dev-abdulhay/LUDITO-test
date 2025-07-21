@@ -33,6 +33,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
 
     @Override
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public ResLogin loginInit(ReqLogin req) {
 
         User user = userService.getByUsername(req.getUsername());
@@ -50,7 +51,12 @@ public class AuthServiceImpl implements AuthService {
                 .code(otpCode)
                 .build();
 
-        userAccessRepository.save(userAccess);
+        user.setAccess(null);
+        userService.saveAndFlush(user);
+
+        user.setAccess(userAccess);
+        userService.saveAndFlush(user);
+
 
         return ResLogin.builder()
                 .identity(userAccess.getUuid())
@@ -88,13 +94,12 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public ResLogout logout() {
-
-//        List<UserAccess> allByUserIdAndStatus = userAccessRepository.findAllByUser_IdAndStatus(GlobalVar.getUserId(), UserLoginStatus.VERIFIED);
-//         userAccessRepository.deleteByUser_IdAndStatus(GlobalVar.getUserId(), UserLoginStatus.VERIFIED);
-//        userAccessRepository.deleteAll(allByUserIdAndStatus);
         User user = GlobalVar.getAuthUser();
-        user.setAccess(null);
-        userService.saveAndFlush(user);
+
+        if (user != null) {
+            user.setAccess(null);
+            userService.saveAndFlush(user);
+        }
 
         GlobalVar.clearContext();
 

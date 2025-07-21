@@ -52,7 +52,7 @@ public class BeforeFilter extends OncePerRequestFilter {
         GlobalVar.setAuthorization(authorization);
 
         if (!isPermitted(request)) {
-            if (!GlobalVar.getAuthorization().isBlank()) {
+            if (GlobalVar.getAuthorization() != null && !GlobalVar.getAuthorization().isBlank()) {
                 try {
                     User user = extIdentityService.validateToken(GlobalVar.getAuthorization());
 

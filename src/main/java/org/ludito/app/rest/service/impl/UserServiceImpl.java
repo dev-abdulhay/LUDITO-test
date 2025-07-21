@@ -1,5 +1,6 @@
 package org.ludito.app.rest.service.impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.ludito.app.config.base.BaseRepository;
 
@@ -88,6 +89,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public User getByUsername(String username) {
         return repository.findByUsername(username)
                 .orElseThrow(() -> new CustomException("User not found with username: " + username));
