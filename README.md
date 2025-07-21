@@ -138,14 +138,13 @@
 
 ---
 
-# Authentication Process Guide
+# Руководство по процессу аутентификации
 
-This section explains how to authenticate users using the two-step login verification implemented in this project’s API.
+В этом разделе описывается, как аутентифицировать пользователей с помощью двухэтапной проверки входа, реализованной в API этого проекта.
 
-## Step 1: Initiate Login
+## Шаг 1: Инициация входа
 
-Send a `POST` request to the login endpoint with the user's credentials:
-
+Отправьте `POST` запрос на эндпоинт для входа с учетными данными пользователя:
 ```bash
 curl -X POST \
 'http://localhost:8081/web/admin/api/v1/auth/login' \
@@ -156,28 +155,23 @@ curl -X POST \
 "password": "password1"
 }'
 ```
+### Ответ
 
-### Response
+При успешной обработке сервер возвращает JSON с:
 
-On successful request, the server responds with a JSON containing:
+- `identity`: уникальный идентификатор сессии входа.
+- `message`: сообщение с подтверждением и OTP-кодом (одноразовым паролем), который пользователь должен ввести для подтверждения.
 
-- `identity`: A unique identifier for the login session.
-- `message`: A confirmation message indicating the login initialization and includes an OTP (One Time Password) code
-  which the user must verify.
-
-Example:
-
+Пример:
 ```json
 {
   "identity": "5d154e58-c500-4c9f-bdb5-65eb1e0da34b",
-  "message": "Login initialized successfully. Please verify your OTP code. (88534)"
+  "message": "Вход инициализирован успешно. Пожалуйста, подтвердите свой OTP код. (88534)"
 }
 ```
+## Шаг 2: Подтверждение OTP кода
 
-## Step 2: Verify OTP Code
-
-To complete the login, send a `POST` request to the verification endpoint with the received `identity` and the OTP code:
-
+Чтобы завершить вход, отправьте `POST` запрос на эндпоинт подтверждения с полученным `identity` и OTP кодом:
 ```bash
 curl -X POST \
 'http://localhost:8081/web/admin/api/v1/auth/login/verify' \
@@ -188,18 +182,16 @@ curl -X POST \
 "code": "88534"
 }'
 ```
+### Ответ
 
-### Response
+Если проверка успешна, сервер возвращает:
 
-If verification is successful, the server returns:
+- `accessToken`: JWT токен доступа для аутентификации последующих запросов.
+- `refreshToken`: JWT токен обновления для получения новых токенов доступа.
+- `accessTokenExpire`: время истечения срока действия токена доступа.
+- `refreshTokenExpire`: время истечения срока действия токена обновления.
 
-- `accessToken`: JWT access token to authenticate subsequent requests.
-- `refreshToken`: JWT refresh token to obtain new access tokens.
-- `accessTokenExpire`: Access token expiration timestamp.
-- `refreshTokenExpire`: Refresh token expiration timestamp.
-
-Example:
-
+Пример:
 ```json
 {
   "accessToken": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyMSIsImV4cCI6MTc1MzIwMTAzMSwidXNlcklkIjoiMDg3N2E1MmMtZjRhZS00MmM3LTg1NzItN2ExZjUyOWYyNjMxIn0.YPMIMkm2JdN3xn33n1exWKlWJ9df2KeyUxjIV0Y1Wus",
@@ -208,34 +200,32 @@ Example:
   "refreshTokenExpire": "2025-08-21T02:37:11"
 }
 ```
+## Использование токена доступа
 
-## Using the Access Token
-
-Include the `accessToken` in the `X-Auth-Token` header (as a ApiKey) for all authenticated API requests, for example:
-
+Включайте `accessToken` в заголовок `X-Auth-Token` (в виде ApiKey) для всех API-запросов, требующих аутентификации, например:
 ```
 
 X-Auth-Token: eyJhbGciOiJ...
 ```
-
-This token authenticates the user and grants access to protected endpoints.
-
----
-
-This two-step authentication ensures secure login with OTP verification, providing robust access control for the API.
-
-# Transfer Process Guide
-
-This section describes the three-step process to perform a transfer using the API.
+Этот токен аутентифицирует пользователя и предоставляет доступ к защищённым ресурсам API.
 
 ---
 
-## Step 1: Calculate Transfer Fee
+Двухэтапная аутентификация с проверкой OTP обеспечивает надежный и безопасный вход в систему, благодаря чему реализован строгий контроль доступа к API.
 
-Send a `POST` request to the `/transfer/fee` endpoint to calculate the commission and amounts involved in the transfer.
 
-### Request
 
+# Руководство по процессу перевода
+
+В этом разделе описывается трехэтапный процесс выполнения перевода с помощью API.
+
+---
+
+## Шаг 1: Расчет комиссии за перевод
+
+Отправьте POST-запрос на эндпоинт `/transfer/fee`, чтобы вычислить комиссию и суммы, участвующие в переводе.
+
+### Запрос
 ```bash
 curl -X POST \
 'http://localhost:8081/web/admin/api/v1/transfer/fee' \
@@ -251,32 +241,27 @@ curl -X POST \
 "description": "First Transfer"
 }'
 ```
+### Ответ
 
-### Response
-
-The server returns a summary of the transfer amounts including the commission fee:
-
+Сервер возвращает сводку по суммам перевода, включая комиссию:
 ```json
 {
-  "commissionAmount": 5000,
-  "creditAmount": 500000,
-  "debitAmount": 505000
+"commissionAmount": 5000,
+"creditAmount": 500000,
+"debitAmount": 505000
 }
 ```
-
-- `commissionAmount`: The fee charged for this transfer.
-- `creditAmount`: The amount that the recipient will receive.
-- `debitAmount`: The total amount that will be deducted from the sender's account (transfer amount + commission).
+- `commissionAmount`: комиссия за перевод.
+- `creditAmount`: сумма, которую получит получатель.
+- `debitAmount`: общая сумма, которая будет списана с отправителя (сумма перевода + комиссия).
 
 ---
 
-## Step 2: Initialize Transfer
+## Шаг 2: Инициализация перевода
 
-Send a `POST` request to the `/transfer/init` endpoint with the same transfer details to create and initialize the
-transfer.
+Отправьте POST-запрос на эндпоинт `/transfer/init` с теми же данными перевода, чтобы создать и инициализировать транзакцию.
 
-### Request
-
+### Запрос
 ```bash
 curl -X POST \
 'http://localhost:8081/web/admin/api/v1/transfer/init' \
@@ -292,25 +277,21 @@ curl -X POST \
 "description": "First Transfer"
 }'
 ```
+### Ответ
 
-### Response
-
-A unique `transferId` is returned, representing the initialized transfer:
-
+Возвращается уникальный идентификатор `transferId`, представляющий инициализированный перевод:
 ```json
 {
-  "transferId": "e3575287-a990-42ee-9827-f2bffef90759"
+"transferId": "e3575287-a990-42ee-9827-f2bffef90759"
 }
 ```
-
 ---
 
-## Step 3: Execute Transfer
+## Шаг 3: Выполнение перевода
 
-Finally, send a `POST` request to `/transfer/execute` with the `transferId` to perform the actual transfer transaction.
+Отправьте POST-запрос на `/transfer/execute` с `transferId`, чтобы провести сам перевод.
 
-### Request
-
+### Запрос
 ```bash
 curl -X POST \
 'http://localhost:8081/web/admin/api/v1/transfer/execute' \
@@ -321,45 +302,35 @@ curl -X POST \
 "transferId": "e3575287-a990-42ee-9827-f2bffef90759"
 }'
 ```
+### Ответ
 
-### Response
-
-Confirms that the transfer was successfully executed:
-
+Подтверждение успешного выполнения перевода:
 ```json
 {
-  "message": "Transfer executed successfully"
+"message": "Transfer executed successfully"
 }
 ```
+---
+
+## Важные примечания
+
+- Всегда включайте валидный `X-Auth-Token` (токен аутентификации) в заголовках запросов.
+- Используйте UUIDы точно, как возвращены на предыдущих шагах, для поддержания целостности запросов.
+- Многоступенчатый процесс обеспечивает проверку, правильное списание комиссии и безопасную обработку перевода.
+
+
+
+# Руководство по поиску истории транзакций
+
+В этом разделе описывается, как выполнять поиск истории транзакций через API в двух распространенных сценариях.
 
 ---
 
-## Notes
+## Шаг 1: Поиск истории транзакций по типу
 
-- Always include a valid `X-Auth-Token` (the access token from login verification) in request headers for
-  authentication.
-- Use UUIDs exactly as returned by previous steps to maintain the integrity of requests.
-- This multi-step process helps ensure the transfer is validated, correctly charged, and processed securely.
+Отправьте POST-запрос на эндпоинт `/history/search` с указанием типа операции и параметров пагинации для получения списка соответствующих операций.
 
-
-
----
-
-
-
-# Transaction History Search Guide
-
-This section explains how to search for transaction history using the API in two common scenarios.
-
----
-
-## Step 1: Search Transaction History by Type
-
-Send a `POST` request to the `/history/search` endpoint with the transaction type and paging parameters to retrieve a list of matching operations.
-
-
-### Request
-
+### Запрос
 ```bash
 curl -X POST \
 'http://localhost:8081/web/admin/api/v1/history/search' \
@@ -374,12 +345,9 @@ curl -X POST \
 }
 }'
 ```
+### Ответ
 
-### Response
-
-The response includes an array of operations matching the filter, each with details such as UUID, status, amounts, and
-description. It also includes paging info.
-
+В ответе возвращается массив операций, соответствующих фильтру, с подробной информацией — UUID, статус, суммы и описание. Также включена информация о пагинации.
 ```json
 {
 "operations": [
@@ -418,19 +386,16 @@ description. It also includes paging info.
 }
 }
 ```
-
-- The `status` field indicates the current state of the transfer (e.g., `INIT`, `SUCCESS`).
-- `executeDate` is null if the transfer has not been completed.
+- Поле `status` обозначает текущий статус перевода (например, `INIT`, `SUCCESS`).
+- `executeDate` равен null, если перевод еще не завершен.
 
 ---
 
-## Step 2: Search Transaction History by Type and Date Range
+## Шаг 2: Поиск истории транзакций по типу и диапазону дат
 
-You can filter transaction history not only by type but also by a specific date range, specifying `fromDate` and
-`toDate`.
+Вы также можете фильтровать историю транзакций по типу и по определённому диапазону дат, указав `fromDate` и `toDate`.
 
-### Request
-
+### Запрос
 ```bash
 curl -X POST \
 'http://localhost:8081/web/admin/api/v1/history/search' \
@@ -447,48 +412,46 @@ curl -X POST \
 }
 }'
 ```
+### Ответ
 
-### Response
-
-The server returns only transactions matching both the type and date range filters.
-
+Сервер возвращает транзакции, подходящие под оба фильтра: тип операции и диапазон дат.
 ```json
 {
-  "operations": [
-    {
-      "uuid": "e3575287-a990-42ee-9827-f2bffef90759",
-      "order": 0,
-      "status": "SUCCESS",
-      "type": "OWN2OTHER",
-      "creditWalletUuid": "71808f5e-925d-47f6-83e0-ee11ac6652f4",
-      "debitWalletUuid": "d3823827-da96-4540-b874-0999ea4d5c76",
-      "creditAmount": 500000,
-      "debitAmount": 505000,
-      "commissionAmount": 5000,
-      "userUuid": "d60bce90-ee97-49c4-aee3-ac2ac2c1d8f2",
-      "executeDate": "2025-07-22 03:19:02",
-      "description": "First Transfer"
-    }
-  ],
-  "paging": {
-    "page": 0,
-    "size": 10
-  }
+"operations": [
+{
+"uuid": "e3575287-a990-42ee-9827-f2bffef90759",
+"order": 0,
+"status": "SUCCESS",
+"type": "OWN2OTHER",
+"creditWalletUuid": "71808f5e-925d-47f6-83e0-ee11ac6652f4",
+"debitWalletUuid": "d3823827-da96-4540-b874-0999ea4d5c76",
+"creditAmount": 500000,
+"debitAmount": 505000,
+"commissionAmount": 5000,
+"userUuid": "d60bce90-ee97-49c4-aee3-ac2ac2c1d8f2",
+"executeDate": "2025-07-22 03:19:02",
+"description": "First Transfer"
+}
+],
+"paging": {
+"page": 0,
+"size": 10
+}
 }
 ```
+---
+
+## Важные примечания
+
+- В каждый запрос необходимо включать валидный заголовок `X-Auth-Token` с токеном аутентификации.
+- Объект `paging` контролирует пагинацию: `page` — номер страницы (начинается с 0), `size` — количество элементов на странице.
+- Поля даты должны быть представлены в формате `"yyyy-MM-dd HH:mm:ss"`.
+
+
 
 ---
 
-## Important Notes
-
-- Include a valid `X-Auth-Token` in each request header for authentication.
-- `paging` object controls pagination with `page` number (starting at 0) and `size` per page.
-- Date fields must be formatted as `"yyyy-MM-dd HH:mm:ss"`.
-
-```
 
 
 
 
-
-Спасибо за внимание! В случае вопросов обращайтесь к документации проекта или внутрь реализации.
